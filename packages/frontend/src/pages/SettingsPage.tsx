@@ -9,9 +9,40 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
 
+interface SettingsItem {
+  label: string;
+  value: string;
+}
+
+interface SettingsSection {
+  title: string;
+  items: SettingsItem[];
+}
+
+function useSettingsSections(): SettingsSection[] {
+  const { user, currentFamily, babies } = useAuthStore();
+
+  return [
+    {
+      title: 'Account',
+      items: [
+        { label: 'Email', value: user?.email || '' },
+        { label: 'User ID', value: user?.uid || '' },
+      ],
+    },
+    {
+      title: 'Family',
+      items: [
+        { label: 'Family Name', value: currentFamily?.name || '' },
+        { label: 'Babies', value: `${babies.length} ${babies.length === 1 ? 'baby' : 'babies'}` },
+      ],
+    },
+  ];
+}
+
 export default function SettingsPage() {
   const navigate = useNavigate();
-  const { user, babies, currentFamily, signOut } = useAuthStore();
+  const { user, babies, signOut } = useAuthStore();
 
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -25,38 +56,7 @@ export default function SettingsPage() {
     }
   };
 
-  const settingsSections = [
-    {
-      title: 'Account',
-      items: [
-        {
-          label: 'Email',
-          value: user?.email || '',
-          type: 'text' as const,
-        },
-        {
-          label: 'User ID',
-          value: user?.uid || '',
-          type: 'text' as const,
-        },
-      ],
-    },
-    {
-      title: 'Family',
-      items: [
-        {
-          label: 'Family Name',
-          value: currentFamily?.name || '',
-          type: 'text' as const,
-        },
-        {
-          label: 'Babies',
-          value: `${babies.length} ${babies.length === 1 ? 'baby' : 'babies'}`,
-          type: 'text' as const,
-        },
-      ],
-    },
-  ];
+  const settingsSections = useSettingsSections();
 
   return (
     <div className="pb-safe-or-24">
@@ -176,7 +176,7 @@ export default function SettingsPage() {
         transition={{ delay: 0.5 }}
       >
         <p>TimeHut v1.0.0</p>
-        <p className="mt-1">Made with ❤️ for families</p>
+        <p className="mt-1">Made with for families</p>
       </motion.div>
     </div>
   );

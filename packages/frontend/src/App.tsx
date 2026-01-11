@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from './stores/authStore';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import { navIcons } from './components/NavigationIcons';
 
 // Lazy load pages for code splitting
 const AuthPage = lazy(() => import('./pages/AuthPage'));
@@ -39,7 +40,6 @@ function PageLoader() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-warm">
       <div className="text-center">
-        {/* Morphing blob loader */}
         <motion.div
           className="w-20 h-20 bg-gradient-to-br from-primary-300 via-primary-400 to-sunset-400 blob-loader mx-auto mb-4"
           animate={{
@@ -52,7 +52,6 @@ function PageLoader() {
             ease: 'easeInOut',
           }}
         />
-        {/* Animated dots */}
         <div className="loading-dots">
           <span></span>
           <span></span>
@@ -76,7 +75,6 @@ function ProtectedRoute({ children, requireOnboarding = true }: { children: Reac
     return <Navigate to="/auth" replace />;
   }
 
-  // Redirect to onboarding if no family exists
   if (requireOnboarding && families.length === 0) {
     return <Navigate to="/onboarding" replace />;
   }
@@ -99,89 +97,6 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Navigation icons as components
-const navIcons = {
-  timeline: (isActive: boolean) => (
-    <motion.svg
-      className="w-6 h-6"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      animate={isActive ? { scale: [1, 1.1, 1] } : {}}
-      transition={{ duration: 0.3 }}
-    >
-      <motion.path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-        initial={{ pathLength: 0.5 }}
-        animate={{ pathLength: isActive ? 1 : 0.5 }}
-        transition={{ duration: 0.3 }}
-      />
-    </motion.svg>
-  ),
-  calendar: (isActive: boolean) => (
-    <motion.svg
-      className="w-6 h-6"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      animate={isActive ? { scale: [1, 1.1, 1] } : {}}
-      transition={{ duration: 0.3 }}
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-    </motion.svg>
-  ),
-  growth: (isActive: boolean) => (
-    <motion.svg
-      className="w-6 h-6"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      animate={isActive ? { y: [0, -5, 0] } : {}}
-      transition={{ duration: 0.3 }}
-    >
-      <motion.path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-        initial={{ pathLength: 0.5 }}
-        animate={{ pathLength: isActive ? 1 : 0.5 }}
-        transition={{ duration: 0.3 }}
-      />
-    </motion.svg>
-  ),
-  capsules: (isActive: boolean) => (
-    <motion.svg
-      className="w-6 h-6"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      animate={isActive ? { rotate: [0, 5, -5, 0] } : {}}
-      transition={{ duration: 0.5 }}
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-    </motion.svg>
-  ),
-  profile: (isActive: boolean) => (
-    <motion.svg
-      className="w-6 h-6"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      animate={isActive ? { scale: [1, 1.1, 1] } : {}}
-      transition={{ duration: 0.3 }}
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-    </motion.svg>
-  ),
-};
-
 // Navigation link component with animated active state
 interface NavLinkProps {
   to: string;
@@ -196,7 +111,6 @@ function NavLink({ to, translationKey, icon }: NavLinkProps) {
 
   return (
     <Link to={to} className="relative flex flex-col items-center justify-center flex-1">
-      {/* Active indicator pill */}
       <AnimatePresence>
         {isActive && (
           <motion.div
@@ -211,7 +125,6 @@ function NavLink({ to, translationKey, icon }: NavLinkProps) {
         )}
       </AnimatePresence>
 
-      {/* Icon container */}
       <motion.div
         className={`p-2 rounded-2xl transition-all duration-300 ${
           isActive
@@ -224,7 +137,6 @@ function NavLink({ to, translationKey, icon }: NavLinkProps) {
         {icon(isActive)}
       </motion.div>
 
-      {/* Label */}
       <motion.span
         className={`text-xs mt-1 font-medium transition-colors ${
           isActive ? 'text-warm-800' : 'text-warm-500'
@@ -250,11 +162,9 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen" style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
-      {/* Glassmorphism Header with iOS Safe Area */}
       <header className="sticky top-0 z-20 glass-dark border-b border-white/50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="container-safe py-4">
           <div className="flex items-center justify-between">
-            {/* Animated Logo */}
             <motion.div
               className="flex items-center space-x-3"
               initial={{ opacity: 0, x: -20 }}
@@ -267,7 +177,6 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 transition={{ type: 'spring', stiffness: 300 }}
               >
                 <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" opacity={0} />
                   <circle cx="12" cy="12" r="5" />
                 </svg>
               </motion.div>
@@ -288,12 +197,8 @@ function AppShell({ children }: { children: React.ReactNode }) {
               </div>
             </motion.div>
 
-            {/* Header Actions */}
             <div className="flex items-center space-x-2">
-              {/* Language Switcher */}
               <LanguageSwitcher />
-
-              {/* Sign Out Button */}
               {user && (
                 <motion.button
                   onClick={handleSignOut}
@@ -312,7 +217,6 @@ function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {/* Main content with page transition */}
       <main className="container-safe py-6">
         <motion.div
           variants={pageVariants}
@@ -325,7 +229,6 @@ function AppShell({ children }: { children: React.ReactNode }) {
         </motion.div>
       </main>
 
-      {/* Animated Bottom Navigation with iOS Safe Area */}
       <nav className="fixed bottom-0 left-0 right-0 glass-dark border-t border-white/50 z-20">
         <div className="flex items-center justify-around py-2 px-2 max-w-lg mx-auto">
           <NavLink to="/timeline" translationKey="timeline" icon={navIcons.timeline} />
@@ -334,7 +237,6 @@ function AppShell({ children }: { children: React.ReactNode }) {
           <NavLink to="/capsules" translationKey="capsules" icon={navIcons.capsules} />
           <NavLink to="/settings" translationKey="settings" icon={navIcons.profile} />
         </div>
-        {/* Safe area spacer for iOS Home Indicator */}
         <div style={{ height: 'env(safe-area-inset-bottom)' }} />
       </nav>
     </div>
@@ -349,7 +251,6 @@ export default function App() {
     initialize();
   }, [initialize]);
 
-  // Show loading screen while initializing auth
   if (!isInitialized) {
     return <PageLoader />;
   }
@@ -358,7 +259,6 @@ export default function App() {
     <Suspense fallback={<PageLoader />}>
       <AnimatePresence mode="wait">
         <Routes>
-          {/* Auth routes */}
           <Route
             path="/auth"
             element={
@@ -368,7 +268,6 @@ export default function App() {
             }
           />
 
-          {/* Onboarding route */}
           <Route
             path="/onboarding"
             element={
@@ -378,7 +277,6 @@ export default function App() {
             }
           />
 
-          {/* Protected routes */}
           <Route
             path="/timeline"
             element={
@@ -440,7 +338,6 @@ export default function App() {
             }
           />
 
-          {/* Default redirect */}
           <Route path="/" element={<Navigate to="/timeline" replace />} />
         </Routes>
       </AnimatePresence>

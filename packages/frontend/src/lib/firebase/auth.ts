@@ -1,18 +1,16 @@
 /**
  * Firebase Authentication Helper Functions
  *
- * Supports email/password authentication.
+ * Provides type-safe wrappers for Firebase Auth operations.
  */
 
+import type { Auth, User, UserCredential } from 'firebase/auth';
 import {
-  Auth,
-  User,
-  UserCredential,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  Unsubscribe,
+  type Unsubscribe,
 } from 'firebase/auth';
 
 /**
@@ -47,22 +45,21 @@ export function onAuthStateChange(
 }
 
 /**
- * Get current user
+ * Get current authenticated user
  */
 export function getCurrentUser(auth: Auth): User | null {
   return auth.currentUser;
 }
 
 /**
- * Get ID token for API requests
+ * Get ID token for authenticated user
  */
 export async function getIdToken(auth: Auth): Promise<string | null> {
   const user = auth.currentUser;
   if (!user) return null;
 
   try {
-    const idToken = await user.getIdToken();
-    return idToken;
+    return await user.getIdToken();
   } catch (error) {
     console.error('Failed to get ID token:', error);
     return null;
@@ -77,8 +74,7 @@ export async function refreshIdToken(auth: Auth): Promise<string | null> {
   if (!user) return null;
 
   try {
-    const idToken = await user.getIdToken(true);
-    return idToken;
+    return await user.getIdToken(true);
   } catch (error) {
     console.error('Failed to refresh ID token:', error);
     return null;

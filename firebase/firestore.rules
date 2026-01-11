@@ -16,6 +16,21 @@ service cloud.firestore {
 
     // Families collection
     match /families/{familyId} {
+      // Create: authenticated users can create families (becoming admins)
+      allow create: if request.auth != null &&
+        request.resource.data.name is string &&
+        request.resource.data.members[request.auth.uid].role == 'admin';
+
+      // Read: members can read family
+      allow read: if isMember(familyId);
+
+      // Update: only admins can update family name
+      allow update: if isAdmin(familyId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']);
+
+      // Delete: only admins can delete family
+      allow delete: if isAdmin(familyId);
+
       // Members subcollection
       match /members/{uid} {
         // Read: any member of the family
@@ -64,8 +79,7 @@ service cloud.firestore {
             // Create: any family member (append-only)
             allow create: if isMember(familyId) &&
               request.resource.data.text is string &&
-              request.resource.data.createdByUid == request.auth.uid &&
-              request.resource.data.createdAt == request.time;
+              request.resource.data.createdByUid == request.auth.uid;
             // Update: only by creator
             allow update: if isMember(familyId) &&
               resource.data.createdByUid == request.auth.uid;

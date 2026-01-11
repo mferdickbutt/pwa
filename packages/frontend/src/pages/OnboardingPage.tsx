@@ -38,44 +38,58 @@ export default function OnboardingPage() {
 
   const nextStep = async () => {
     setError('');
-    if (step === 0) {
-      // Language selection - save and continue
-      setIsLoading(true);
-      try {
-        // Change language
-        await i18n.changeLanguage(selectedLanguage);
+
+    switch (step) {
+      case 0: {
+        // Language selection - save and continue
+        setIsLoading(true);
+        try {
+          await i18n.changeLanguage(selectedLanguage);
+        } catch {
+          // Continue even if language change fails
+        } finally {
+          setIsLoading(false);
+        }
         setStep(1);
-      } catch (err) {
-        // Continue even if language change fails
-        setStep(1);
-      } finally {
-        setIsLoading(false);
+        break;
       }
-    } else if (step === 1) {
-      // Welcome - just continue
-      setStep(2);
-    } else if (step === 2) {
-      // Family name
-      if (!familyName.trim()) {
-        setError('Please enter a family name');
-        return;
+
+      case 1:
+        // Welcome - just continue
+        setStep(2);
+        break;
+
+      case 2: {
+        // Family name
+        if (!familyName.trim()) {
+          setError('Please enter a family name');
+          return;
+        }
+        setIsLoading(true);
+        try {
+          await createFamily(familyName.trim());
+          setStep(3);
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : 'Failed to create family';
+          setError(message);
+        } finally {
+          setIsLoading(false);
+        }
+        break;
       }
-      setIsLoading(true);
-      try {
-        await createFamily(familyName.trim());
-        setStep(3);
-      } catch (err: any) {
-        setError(err.message || 'Failed to create family');
-      } finally {
-        setIsLoading(false);
+
+      case 3: {
+        // Baby info
+        if (!babyName.trim() || !babyDob) {
+          setError('Please fill in all fields');
+          return;
+        }
+        await completeOnboarding();
+        break;
       }
-    } else if (step === 3) {
-      // Baby info
-      if (!babyName.trim() || !babyDob) {
-        setError('Please fill in all fields');
-        return;
-      }
-      await completeOnboarding();
+
+      default:
+        break;
     }
   };
 
@@ -91,16 +105,13 @@ export default function OnboardingPage() {
     setError('');
 
     try {
-      // Create the baby
       await createBaby(babyName.trim(), new Date(babyDob).toISOString(), babyGender);
       setStep(4);
 
-      // Navigate to timeline after a short delay
-      setTimeout(() => {
-        navigate('/timeline');
-      }, 2000);
-    } catch (err: any) {
-      setError(err.message || 'Failed to create profile');
+      setTimeout(() => navigate('/timeline'), 2000);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to create profile';
+      setError(message);
     } finally {
       setIsLoading(false);
     }

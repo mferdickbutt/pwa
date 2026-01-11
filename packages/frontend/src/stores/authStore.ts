@@ -22,9 +22,11 @@ import {
   getUserFamilies,
   getBabies,
   updateBaby,
-  createFamily,
-  createBaby,
+  createFamily as createFamilyDoc,
+  createBaby as createBabyDoc,
 } from '../lib/firebase/firestore';
+
+const CURRENT_FAMILY_ID_KEY = 'timehut_current_family_id';
 
 /**
  * Authentication state
@@ -76,7 +78,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialize: async () => {
     const auth = getAuthInstance();
 
-    // Set up auth state listener
     onAuthStateChange(auth, async (user) => {
       set({
         user,
@@ -85,20 +86,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isInitialized: true,
       });
 
-      // Load user's families if authenticated
       if (user) {
         await get().reloadFamilies();
 
-        // Restore current family from localStorage
-        const savedFamilyId = localStorage.getItem('timehut_current_family_id');
-        if (savedFamilyId) {
-          await get().setCurrentFamily(savedFamilyId);
-        } else if (get().families.length > 0) {
-          // Default to first family
-          await get().setCurrentFamily(get().families[0].id!);
+        const savedFamilyId = localStorage.getItem(CURRENT_FAMILY_ID_KEY);
+        const familyId = savedFamilyId || get().families[0]?.id;
+        if (familyId) {
+          await get().setCurrentFamily(familyId);
         }
       } else {
-        // Clear state on sign out
         set({
           families: [],
           currentFamily: null,
@@ -115,7 +111,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signOut: async () => {
     const auth = getAuthInstance();
     await firebaseSignOut(auth);
-    localStorage.removeItem('timehut_current_family_id');
+    localStorage.removeItem(CURRENT_FAMILY_ID_KEY);
     set({
       user: null,
       uid: null,
@@ -131,12 +127,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    */
   createFamily: async (name: string) => {
     const { uid } = get();
-    if (!uid) throw new Error('Not authenticated');
+    if (!uid) {
+      throw new Error('Not authenticated');
+    }
 
     const db = await getFirestoreInstance();
-    const familyId = await createFamily(db, name.trim(), uid);
+    const familyId = await createFamilyDoc(db, name.trim(), uid);
 
-    // Reload families and set as current
     await get().reloadFamilies();
     await get().setCurrentFamily(familyId);
 
@@ -155,7 +152,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
 
-    // Load family data
     const db = await getFirestoreInstance();
     const family = await getFamily(db, familyId);
 
@@ -164,7 +160,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
 
-    // Check if user is a member
     if (!family.members[user.uid]) {
       console.error(`[Auth] User is not a member of family ${familyId}`);
       return;
@@ -175,10 +170,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       currentFamilyId: familyId,
     });
 
-    // Save to localStorage
-    localStorage.setItem('timehut_current_family_id', familyId);
-
-    // Load babies for this family
+    localStorage.setItem(CURRENT_FAMILY_ID_KEY, familyId);
     await get().reloadBabies();
   },
 
@@ -191,7 +183,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     const db = await getFirestoreInstance();
     const families = await getUserFamilies(db, uid);
-
     set({ families });
   },
 
@@ -204,7 +195,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     const db = await getFirestoreInstance();
     const babies = await getBabies(db, currentFamilyId);
-
     set({ babies });
   },
 
@@ -213,18 +203,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    */
   createBaby: async (name: string, dob: string, gender: 'male' | 'female') => {
     const { currentFamilyId } = get();
-    if (!currentFamilyId) throw new Error('No family selected');
+    if (!currentFamilyId) {
+      throw new Error('No family selected');
+    }
 
     const db = await getFirestoreInstance();
-    const babyId = await createBaby(db, currentFamilyId, {
+    const babyId = await createBabyDoc(db, currentFamilyId, {
       name: name.trim(),
       dob,
       gender,
     });
 
-    // Reload babies
     await get().reloadBabies();
-
     return babyId;
   },
 
@@ -233,16 +223,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    */
   updateBaby: async (babyId, updates) => {
     const { currentFamilyId } = get();
-
     if (!currentFamilyId) {
       throw new Error('No family selected');
     }
 
-    // Update in Firestore
     const db = await getFirestoreInstance();
     await updateBaby(db, currentFamilyId, babyId, updates);
 
-    // Update local state
     set({
       babies: get().babies.map((b) =>
         b.id === babyId ? { ...b, ...updates } : b
