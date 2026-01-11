@@ -11,11 +11,13 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 
 // Lazy load pages for code splitting
 const AuthPage = lazy(() => import('./pages/AuthPage'));
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const TimelinePage = lazy(() => import('./pages/TimelinePage'));
 const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const GrowthPage = lazy(() => import('./pages/GrowthPage'));
 const CapsulesPage = lazy(() => import('./pages/CapsulesPage'));
 const BabyProfilePage = lazy(() => import('./pages/BabyProfilePage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 // Page transition variants
 const pageVariants = {
@@ -62,9 +64,9 @@ function PageLoader() {
   );
 }
 
-// Protected route component
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuthStore();
+// Protected route component with onboarding check
+function ProtectedRoute({ children, requireOnboarding = true }: { children: React.ReactNode; requireOnboarding?: boolean }) {
+  const { user, isLoading, families } = useAuthStore();
 
   if (isLoading) {
     return <PageLoader />;
@@ -72,6 +74,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // Redirect to onboarding if no family exists
+  if (requireOnboarding && families.length === 0) {
+    return <Navigate to="/onboarding" replace />;
   }
 
   return <>{children}</>;
@@ -325,9 +332,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
           <NavLink to="/calendar" translationKey="calendar" icon={navIcons.calendar} />
           <NavLink to="/growth" translationKey="growth" icon={navIcons.growth} />
           <NavLink to="/capsules" translationKey="capsules" icon={navIcons.capsules} />
-          {babies.length > 0 && (
-            <NavLink to={`/baby/${(babies[0] as any).id || ''}`} translationKey="profile" icon={navIcons.profile} />
-          )}
+          <NavLink to="/settings" translationKey="settings" icon={navIcons.profile} />
         </div>
         {/* Safe area spacer for iOS Home Indicator */}
         <div style={{ height: 'env(safe-area-inset-bottom)' }} />
@@ -360,6 +365,16 @@ export default function App() {
               <PublicRoute>
                 <AuthPage />
               </PublicRoute>
+            }
+          />
+
+          {/* Onboarding route */}
+          <Route
+            path="/onboarding"
+            element={
+              <ProtectedRoute requireOnboarding={false}>
+                <OnboardingPage />
+              </ProtectedRoute>
             }
           />
 
@@ -410,6 +425,16 @@ export default function App() {
               <ProtectedRoute>
                 <AppShell>
                   <BabyProfilePage />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute requireOnboarding={false}>
+                <AppShell>
+                  <SettingsPage />
                 </AppShell>
               </ProtectedRoute>
             }

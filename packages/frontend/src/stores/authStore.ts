@@ -22,6 +22,8 @@ import {
   getUserFamilies,
   getBabies,
   updateBaby,
+  createFamily,
+  createBaby,
 } from '../lib/firebase/firestore';
 
 /**
@@ -45,9 +47,11 @@ interface AuthState {
   // Actions
   initialize: () => Promise<void>;
   signOut: () => Promise<void>;
+  createFamily: (name: string) => Promise<string>;
   setCurrentFamily: (familyId: string) => Promise<void>;
   reloadFamilies: () => Promise<void>;
   reloadBabies: () => Promise<void>;
+  createBaby: (name: string, dob: string, gender: 'male' | 'female') => Promise<void>;
   updateBaby: (babyId: string, updates: Partial<Omit<BabyDocument, 'createdAt' | 'id'>>) => Promise<void>;
   reset: () => void;
 }
@@ -123,6 +127,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   /**
+   * Create a new family
+   */
+  createFamily: async (name: string) => {
+    const { uid } = get();
+    if (!uid) throw new Error('Not authenticated');
+
+    const db = await getFirestoreInstance();
+    const familyId = await createFamily(db, name.trim(), uid);
+
+    // Reload families and set as current
+    await get().reloadFamilies();
+    await get().setCurrentFamily(familyId);
+
+    return familyId;
+  },
+
+  /**
    * Set current family
    */
   setCurrentFamily: async (familyId: string) => {
@@ -185,6 +206,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const babies = await getBabies(db, currentFamilyId);
 
     set({ babies });
+  },
+
+  /**
+   * Create a new baby
+   */
+  createBaby: async (name: string, dob: string, gender: 'male' | 'female') => {
+    const { currentFamilyId } = get();
+    if (!currentFamilyId) throw new Error('No family selected');
+
+    const db = await getFirestoreInstance();
+    const babyId = await createBaby(db, currentFamilyId, {
+      name: name.trim(),
+      dob,
+      gender,
+    });
+
+    // Reload babies
+    await get().reloadBabies();
+
+    return babyId;
   },
 
   /**
