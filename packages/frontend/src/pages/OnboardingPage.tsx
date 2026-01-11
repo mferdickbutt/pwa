@@ -18,7 +18,6 @@ const GENDER_OPTIONS = [
 const STEP_TITLES = ['Welcome!', 'About Your Family', 'Your Baby', 'All Set!'];
 
 export default function OnboardingPage() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, createFamily, createBaby } = useAuthStore();
 

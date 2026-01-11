@@ -6,12 +6,10 @@
 
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
 
 export default function SettingsPage() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, babies, currentFamily, signOut } = useAuthStore();
 
@@ -106,7 +104,7 @@ export default function SettingsPage() {
             {section.title}
           </h3>
           <div className="glass rounded-2xl overflow-hidden divide-y divide-warm-100">
-            {section.items.map((item, i) => (
+            {section.items.map((item) => (
               <div
                 key={item.label}
                 className="flex items-center justify-between p-4 hover:bg-warm-50/50 transition-colors"

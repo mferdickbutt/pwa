@@ -240,7 +240,7 @@ function NavLink({ to, translationKey, icon }: NavLinkProps) {
 
 // App shell with modern animated navigation
 function AppShell({ children }: { children: React.ReactNode }) {
-  const { user, signOut, currentFamily, babies } = useAuthStore();
+  const { user, signOut, currentFamily } = useAuthStore();
   const { t } = useTranslation();
 
   const handleSignOut = () => {

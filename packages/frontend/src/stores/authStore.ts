@@ -51,7 +51,7 @@ interface AuthState {
   setCurrentFamily: (familyId: string) => Promise<void>;
   reloadFamilies: () => Promise<void>;
   reloadBabies: () => Promise<void>;
-  createBaby: (name: string, dob: string, gender: 'male' | 'female') => Promise<void>;
+  createBaby: (name: string, dob: string, gender: 'male' | 'female') => Promise<string>;
   updateBaby: (babyId: string, updates: Partial<Omit<BabyDocument, 'createdAt' | 'id'>>) => Promise<void>;
   reset: () => void;
 }
