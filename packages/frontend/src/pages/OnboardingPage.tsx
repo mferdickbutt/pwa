@@ -1,7 +1,7 @@
 /**
  * Onboarding Page - First Time User Experience
  *
- * Guides new users through creating their family and first baby profile.
+ * Language selection, family creation, and baby profile setup.
  */
 
 import { useState } from 'react';
@@ -9,18 +9,24 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
 
+const LANGUAGES = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'zh-TW', name: '繁體中文', flag: '🇹🇼' },
+];
+
 const GENDER_OPTIONS = [
   { value: 'male', label: 'Boy', icon: '👦' },
   { value: 'female', label: 'Girl', icon: '👧' },
 ];
 
-const STEP_TITLES = ['Welcome!', 'About Your Family', 'Your Baby', 'All Set!'];
+const STEP_TITLES = ['Language', 'Welcome!', 'Your Family', 'Your Baby', 'All Set!'];
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const { user, createFamily, createBaby } = useAuthStore();
 
   const [step, setStep] = useState(0);
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [familyName, setFamilyName] = useState('');
   const [babyName, setBabyName] = useState('');
   const [babyDob, setBabyDob] = useState('');
@@ -31,23 +37,39 @@ export default function OnboardingPage() {
   const nextStep = async () => {
     setError('');
     if (step === 0) {
-      setStep(1);
+      // Language selection - save and continue
+      setIsLoading(true);
+      try {
+        // Change language
+        const { i18n } = await import('react-i18next');
+        await i18n.changeLanguage(selectedLanguage);
+        setStep(1);
+      } catch (err) {
+        // Continue even if language change fails
+        setStep(1);
+      } finally {
+        setIsLoading(false);
+      }
     } else if (step === 1) {
+      // Welcome - just continue
+      setStep(2);
+    } else if (step === 2) {
+      // Family name
       if (!familyName.trim()) {
         setError('Please enter a family name');
         return;
       }
-      // Create family first
       setIsLoading(true);
       try {
         await createFamily(familyName.trim());
-        setStep(2);
+        setStep(3);
       } catch (err: any) {
         setError(err.message || 'Failed to create family');
       } finally {
         setIsLoading(false);
       }
-    } else if (step === 2) {
+    } else if (step === 3) {
+      // Baby info
       if (!babyName.trim() || !babyDob) {
         setError('Please fill in all fields');
         return;
@@ -70,7 +92,7 @@ export default function OnboardingPage() {
     try {
       // Create the baby
       await createBaby(babyName.trim(), new Date(babyDob).toISOString(), babyGender);
-      setStep(3);
+      setStep(4);
 
       // Navigate to timeline after a short delay
       setTimeout(() => {
@@ -83,7 +105,7 @@ export default function OnboardingPage() {
     }
   };
 
-  const progress = ((step + 1) / STEP_TITLES.length) * 100;
+  const progress = ((step + 1) / (STEP_TITLES.length - 1)) * 100;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-warm" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
@@ -105,20 +127,22 @@ export default function OnboardingPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 200 }}
       >
-        {/* Progress bar */}
-        <div className="mb-8">
-          <div className="h-2 bg-warm-200 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-gradient-to-r from-primary-400 via-sunset-400 to-rose-400"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5 }}
-            />
+        {/* Progress bar - skip for language step */}
+        {step > 0 && (
+          <div className="mb-8">
+            <div className="h-2 bg-warm-200 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-primary-400 via-sunset-400 to-rose-400"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
+            <p className="text-center text-sm text-warm-500 mt-2 font-medium">
+              Step {step} of {STEP_TITLES.length - 1}
+            </p>
           </div>
-          <p className="text-center text-sm text-warm-500 mt-2 font-medium">
-            Step {step + 1} of {STEP_TITLES.length}
-          </p>
-        </div>
+        )}
 
         {/* Card */}
         <motion.div
@@ -150,8 +174,50 @@ export default function OnboardingPage() {
             )}
           </AnimatePresence>
 
-          {/* Step 0: Welcome */}
+          {/* Step 0: Language Selection */}
           {step === 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-4"
+            >
+              <p className="text-center text-warm-600 mb-6">
+                Choose your preferred language
+              </p>
+              {LANGUAGES.map((lang) => (
+                <motion.button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => setSelectedLanguage(lang.code)}
+                  className={`w-full p-4 rounded-xl border-2 transition-all flex items-center space-x-4 ${
+                    selectedLanguage === lang.code
+                      ? 'border-primary-400 bg-primary-50 shadow-warm'
+                      : 'border-warm-200 hover:border-warm-300'
+                  }`}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={isLoading}
+                >
+                  <span className="text-3xl">{lang.flag}</span>
+                  <span className="text-lg font-medium text-warm-800">{lang.name}</span>
+                  {selectedLanguage === lang.code && (
+                    <motion.span
+                      className="ml-auto text-primary-500"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                    >
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </motion.span>
+                  )}
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+
+          {/* Step 1: Welcome */}
+          {step === 1 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -175,8 +241,8 @@ export default function OnboardingPage() {
             </motion.div>
           )}
 
-          {/* Step 1: Family Name */}
-          {step === 1 && (
+          {/* Step 2: Family Name */}
+          {step === 2 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -191,6 +257,7 @@ export default function OnboardingPage() {
                 placeholder="e.g., The Smith Family"
                 className="w-full px-4 py-3 bg-white/80 border-2 border-warm-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-primary-400 focus:outline-none transition-all font-medium text-warm-700"
                 disabled={isLoading}
+                autoFocus
               />
               <p className="text-xs text-warm-400 mt-2">
                 This will be the name for your family group.
@@ -198,8 +265,8 @@ export default function OnboardingPage() {
             </motion.div>
           )}
 
-          {/* Step 2: Baby Info */}
-          {step === 2 && (
+          {/* Step 3: Baby Info */}
+          {step === 3 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -216,6 +283,7 @@ export default function OnboardingPage() {
                   placeholder="Enter name"
                   className="w-full px-4 py-3 bg-white/80 border-2 border-warm-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-primary-400 focus:outline-none transition-all font-medium text-warm-700"
                   disabled={isLoading}
+                  autoFocus
                 />
               </div>
 
@@ -261,8 +329,8 @@ export default function OnboardingPage() {
             </motion.div>
           )}
 
-          {/* Step 3: Complete */}
-          {step === 3 && (
+          {/* Step 4: Complete */}
+          {step === 4 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -285,7 +353,7 @@ export default function OnboardingPage() {
           )}
 
           {/* Navigation buttons */}
-          {step < 3 && (
+          {step < 4 && (
             <div className="flex gap-3 mt-6">
               {step > 0 && (
                 <motion.button
@@ -314,7 +382,7 @@ export default function OnboardingPage() {
                     />
                     Saving...
                   </span>
-                ) : step === 2 ? 'Finish' : 'Next'}
+                ) : step === 3 ? 'Finish' : 'Next'}
               </motion.button>
             </div>
           )}
