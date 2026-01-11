@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
 
 const LANGUAGES = [
@@ -23,6 +24,7 @@ const STEP_TITLES = ['Language', 'Welcome!', 'Your Family', 'Your Baby', 'All Se
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
   const { user, createFamily, createBaby } = useAuthStore();
 
   const [step, setStep] = useState(0);
@@ -41,7 +43,6 @@ export default function OnboardingPage() {
       setIsLoading(true);
       try {
         // Change language
-        const { i18n } = await import('react-i18next');
         await i18n.changeLanguage(selectedLanguage);
         setStep(1);
       } catch (err) {
