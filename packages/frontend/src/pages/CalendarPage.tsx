@@ -15,7 +15,7 @@ import { getDateFnsLocale } from '../lib/i18n/config';
 
 export default function CalendarPage() {
   const { t, i18n } = useTranslation();
-  const { currentFamilyId, babies } = useAuthStore();
+  const { babies } = useAuthStore();
   const { moments } = useMomentStore();
   const currentBaby = babies[0];
 
@@ -48,7 +48,6 @@ export default function CalendarPage() {
   // Get day names based on locale
   const getDayNames = () => {
     const days: Date[] = [];
-    const sunday = new Date(2025, 0, 5); // A Sunday
     for (let i = 0; i < 7; i++) {
       days.push(new Date(2025, 0, 5 + i));
     }
@@ -174,7 +173,7 @@ export default function CalendarPage() {
                   {/* Moment thumbnails overlay */}
                   {hasMoments && (
                     <div className="absolute inset-0 grid grid-cols-2 gap-px bg-warm-200/50">
-                      {previewMoments.map((moment, idx) => (
+                      {previewMoments.map((moment) => (
                         <div
                           key={moment.id}
                           className="relative bg-warm-100 overflow-hidden"

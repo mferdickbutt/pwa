@@ -15,7 +15,6 @@ import {
   onAuthStateChange,
   signOut as firebaseSignOut,
   getCurrentUser,
-  getIdToken,
   completeEmailLinkSignIn,
 } from '../lib/firebase/auth';
 import type { User } from 'firebase/auth';
@@ -127,7 +126,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     // Set up auth state listener
-    const unsubscribe = onAuthStateChange(auth, async (user) => {
+    onAuthStateChange(auth, async (user) => {
       set({
         user,
         uid: user?.uid || null,
@@ -157,9 +156,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
       }
     });
-
-    // Store unsubscribe for cleanup
-    set({ _unsubscribe: unsubscribe as any });
   },
 
   /**

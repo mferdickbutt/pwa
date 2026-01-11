@@ -15,9 +15,9 @@ import { getAuthInstance } from '../lib/firebase/config';
 
 // Demo moments for demo mode
 const DEMO_MOMENTS = [
-  { id: '1', dateTaken: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), dateKey: '2025-01-10', caption: 'First smile!', mediaType: 'photo' as const, mediaObjectKey: 'demo1', createdAt: new Date().toISOString(), createdByUid: 'demo-user' },
-  { id: '2', dateTaken: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), dateKey: '2025-01-04', caption: 'Tummy time!', mediaType: 'photo' as const, mediaObjectKey: 'demo2', createdAt: new Date().toISOString(), createdByUid: 'demo-user' },
-  { id: '3', dateTaken: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), dateKey: '2024-12-12', caption: 'Meeting Santa', mediaType: 'photo' as const, mediaObjectKey: 'demo3', createdAt: new Date().toISOString(), createdByUid: 'demo-user' },
+  { id: '1', dateTaken: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), dateKey: '2025-01-10', caption: 'First smile!', mediaType: 'photo' as const, contentType: 'image/jpeg', mediaObjectKey: 'demo1', createdAt: new Date().toISOString(), createdByUid: 'demo-user' },
+  { id: '2', dateTaken: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), dateKey: '2025-01-04', caption: 'Tummy time!', mediaType: 'photo' as const, contentType: 'image/jpeg', mediaObjectKey: 'demo2', createdAt: new Date().toISOString(), createdByUid: 'demo-user' },
+  { id: '3', dateTaken: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), dateKey: '2024-12-12', caption: 'Meeting Santa', mediaType: 'photo' as const, contentType: 'image/jpeg', mediaObjectKey: 'demo3', createdAt: new Date().toISOString(), createdByUid: 'demo-user' },
 ];
 
 export default function AuthPage() {
@@ -61,7 +61,7 @@ export default function AuthPage() {
       // Set demo moments
       const momentStore = await import('../stores/momentStore');
       momentStore.useMomentStore.setState({
-        moments: DEMO_MOMENTS.map((m, i) => ({
+        moments: DEMO_MOMENTS.map((m) => ({
           ...m,
           displayUrl: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#fef9c3"/><stop offset="100%" style="stop-color:#fed7aa"/></linearGradient></defs><rect fill="url(#bg)" width="400" height="400"/><circle cx="200" cy="150" r="60" fill="#fca5a5"/><circle cx="180" cy="140" r="8" fill="#1f2937"/><circle cx="220" cy="140" r="8" fill="#1f2937"/><path d="M170 180 Q200 210 230 180" stroke="#1f2937" stroke-width="4" fill="none"/><text x="200" y="320" text-anchor="middle" font-size="24" fill="#78350f">First smile!</text></svg>'),
           isUrlLoading: false,

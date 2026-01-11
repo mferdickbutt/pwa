@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
 import { useMomentStore } from '../stores/momentStore';
-import { formatAgeFromDate } from '../lib/utils/age';
 import MomentItem from '../components/timeline/MomentItem';
 import CreateMomentButton from '../components/timeline/CreateMomentButton';
 
@@ -32,7 +31,7 @@ const itemVariants = {
     y: 0,
     scale: 1,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 200,
       damping: 20,
     },
@@ -299,7 +298,7 @@ export default function TimelinePage() {
             initial="hidden"
             animate="show"
           >
-            {moments.map((moment, index) => (
+            {moments.map((moment) => (
               <motion.div
                 key={moment.id}
                 variants={itemVariants}

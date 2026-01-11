@@ -13,7 +13,6 @@ import type {
 } from '../types/firestore';
 import {
   getMoments,
-  getMoment,
   getComments,
   addComment,
   updateComment,
@@ -68,7 +67,7 @@ interface MomentState {
   deleteComment: (familyId: string, babyId: string, momentId: string, commentId: string) => Promise<void>;
 
   // Moment actions
-  createMoment: (familyId: string, babyId: string, momentData: Omit<MomentDocument, 'createdAt' | 'id' | 'createdByUid'>, uid: string, localPreview?: { url: string; file: File }) => Promise<void>;
+  createMoment: (familyId: string, babyId: string, momentData: Omit<MomentDocument, 'createdAt' | 'id' | 'createdByUid'>, uid: string, localPreview?: { url: string; file: File }) => Promise<string>;
   updateCaption: (familyId: string, babyId: string, momentId: string, caption: string) => Promise<void>;
   deleteMoment: (familyId: string, babyId: string, momentId: string) => Promise<void>;
 }
@@ -237,11 +236,11 @@ export const useMomentStore = create<MomentState>((set, get) => ({
    * Load all visible moment URLs (for initial viewport)
    */
   loadAllVisibleUrls: async () => {
-    const { moments, familyId } = get();
+    const { moments } = get();
 
     // Get current family from auth store
     const { useAuthStore } = await import('./authStore');
-    const currentFamilyId = useAuthStore.getState().currentFamilyId || familyId;
+    const currentFamilyId = useAuthStore.getState().currentFamilyId;
 
     if (!currentFamilyId) return;
 

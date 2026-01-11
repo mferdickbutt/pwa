@@ -18,10 +18,7 @@ import {
   orderBy,
   limit,
   startAfter,
-  QueryDocumentSnapshot,
-  DocumentData,
   addDoc,
-  serverTimestamp,
   Timestamp,
 } from 'firebase/firestore';
 import type {
@@ -430,8 +427,8 @@ export async function getComments(
 
   return querySnapshot.docs.map((doc) => ({
     id: doc.id,
-    ...doc.data(),
-  })) as CommentDocument[];
+    ...(doc.data() as Omit<CommentDocument, 'id'>),
+  }));
 }
 
 /**

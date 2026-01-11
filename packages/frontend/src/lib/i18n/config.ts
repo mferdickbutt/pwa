@@ -14,6 +14,7 @@ import zhTWTranslations from '../../locales/zh-TW.json';
 
 // Import date-fns locales
 import { enUS, zhTW } from 'date-fns/locale';
+import type { Locale } from 'date-fns/locale';
 
 // Export date-fns locales for use in components
 export const dateFnsLocales = {

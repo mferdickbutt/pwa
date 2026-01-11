@@ -10,6 +10,7 @@ export interface BaseDocument {
 
 // Family document
 export interface FamilyDocument extends BaseDocument {
+  id: string;
   name: string;
   members: Record<string, FamilyMember>;
 }
@@ -22,6 +23,7 @@ export interface FamilyMember {
 
 // Baby document
 export interface BabyDocument extends BaseDocument {
+  id: string;
   name: string;
   dob: string; // ISO 8601 date string
   gender?: 'male' | 'female';
@@ -31,6 +33,7 @@ export interface BabyDocument extends BaseDocument {
 
 // Moment document
 export interface MomentDocument extends BaseDocument {
+  id: string;
   mediaObjectKey: string;
   mediaType: 'photo' | 'video';
   contentType: string;
@@ -58,6 +61,7 @@ export interface CommentDocument extends BaseDocument {
 
 // Growth entry document
 export interface GrowthEntryDocument extends BaseDocument {
+  id: string;
   date: string; // ISO 8601 date string
   weightKg?: number;
   heightCm?: number;
@@ -68,6 +72,7 @@ export interface GrowthEntryDocument extends BaseDocument {
 
 // Capsule document
 export interface CapsuleDocument extends BaseDocument {
+  id: string;
   title: string;
   content?: string;
   coverObjectKey?: string;

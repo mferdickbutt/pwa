@@ -19,7 +19,7 @@ export default function GrowthPage() {
   const { t } = useTranslation();
   const { i18n } = useTranslation();
   const { babies, user, currentFamilyId } = useAuthStore();
-  const { entries, isLoading, createEntry } = useGrowthStore();
+  const { entries, createEntry } = useGrowthStore();
   const currentBaby = babies[0];
   const locale = getDateFnsLocale(i18n.language);
 
@@ -80,9 +80,9 @@ export default function GrowthPage() {
         currentBaby.id!,
         {
           date: new Date(date).toISOString(),
-          weight: weight ? parseFloat(weight) : undefined,
-          height: height ? parseFloat(height) : undefined,
-          headCircumference: headCircumference ? parseFloat(headCircumference) : undefined,
+          weightKg: weight ? parseFloat(weight) : undefined,
+          heightCm: height ? parseFloat(height) : undefined,
+          headCircumferenceCm: headCircumference ? parseFloat(headCircumference) : undefined,
         },
         user.uid
       );
@@ -334,13 +334,13 @@ export default function GrowthPage() {
                       {format(new Date(entry.date), 'yyyy-MM-dd', { locale })}
                     </td>
                     <td className="px-4 py-3 text-sm text-warm-700">
-                      {entry.weight ? `${entry.weight} ${t('common.kg')}` : '-'}
+                      {entry.weightKg ? `${entry.weightKg} ${t('common.kg')}` : '-'}
                     </td>
                     <td className="px-4 py-3 text-sm text-warm-700">
-                      {entry.height ? `${entry.height} ${t('common.cm')}` : '-'}
+                      {entry.heightCm ? `${entry.heightCm} ${t('common.cm')}` : '-'}
                     </td>
                     <td className="px-4 py-3 text-sm text-warm-700">
-                      {entry.headCircumference ? `${entry.headCircumference} ${t('common.cm')}` : '-'}
+                      {entry.headCircumferenceCm ? `${entry.headCircumferenceCm} ${t('common.cm')}` : '-'}
                     </td>
                   </tr>
                 ))}

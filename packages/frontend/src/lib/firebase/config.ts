@@ -98,9 +98,8 @@ export async function getFirestoreInstance(): Promise<Firestore> {
     // Connect to emulator if enabled
     if (USE_EMULATORS) {
       const firestoreEmulatorHost = import.meta.env.VITE_FIRESTORE_EMULATOR_HOST || 'localhost:8080';
-      connectFirestoreEmulator(firestoreInstance, firestoreEmulatorHost, {
-        ssl: false,
-      });
+      const [host, port] = firestoreEmulatorHost.split(':');
+      connectFirestoreEmulator(firestoreInstance, host, parseInt(port, 10));
       console.log(`[Firebase] Connected to Firestore emulator at ${firestoreEmulatorHost}`);
     } else {
       // Enable offline persistence for production

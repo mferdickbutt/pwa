@@ -11,7 +11,6 @@ import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { useAuthStore } from '../../stores/authStore';
 import { useMomentStore } from '../../stores/momentStore';
-import { getDateFnsLocale } from '../../lib/i18n/config';
 import { getDateKey } from '../../lib/utils/calendar';
 
 interface CreateMomentButtonProps {
@@ -19,8 +18,7 @@ interface CreateMomentButtonProps {
 }
 
 export default function CreateMomentButton(_props: CreateMomentButtonProps) {
-  const { t, i18n } = useTranslation();
-  const locale = getDateFnsLocale(i18n.language);
+  const { t } = useTranslation();
   const { user, currentFamilyId, babies } = useAuthStore();
   const { createMoment } = useMomentStore();
 
@@ -83,6 +81,7 @@ export default function CreateMomentButton(_props: CreateMomentButtonProps) {
         {
           mediaType: selectedFile.type.startsWith('image/') ? 'photo' : 'video',
           mediaObjectKey: objectKey,
+          contentType: selectedFile.type,
           dateTaken: new Date(dateTaken).toISOString(),
           dateKey: getDateKey(new Date(dateTaken)),
           caption: caption.trim(),

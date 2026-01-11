@@ -43,3 +43,4 @@ ui-debug.log*
 
 # MinIO data
 minio_data/
+.vercel
