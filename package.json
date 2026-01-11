@@ -1,0 +1,27 @@
+{
+  "name": "timehut-pwa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A private family baby memory book Progressive Web App",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:api\"",
+    "dev:frontend": "npm run dev --workspace=packages/frontend",
+    "dev:api": "npm run dev --workspace=packages/media-api",
+    "build": "npm run build --workspace=packages/frontend && npm run build --workspace=packages/media-api",
+    "build:frontend": "npm run build --workspace=packages/frontend",
+    "build:api": "npm run build --workspace=packages/media-api",
+    "test": "npm run test --workspace=packages/frontend",
+    "lint": "npm run lint --workspace=packages/frontend",
+    "type-check": "npm run type-check --workspace=packages/frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

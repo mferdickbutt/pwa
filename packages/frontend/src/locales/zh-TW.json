@@ -1,0 +1,128 @@
+{
+  "translation": {
+    "app": {
+      "name": "時光小屋",
+      "tagline": "專屬於寶寶的私人記憶簿",
+      "signOut": "登出",
+      "loading": "載入中...",
+      "loadingMemories": "載入回憶中..."
+    },
+    "nav": {
+      "timeline": "時間軸",
+      "calendar": "日曆",
+      "growth": "成長",
+      "capsules": "時光膠囊",
+      "profile": "個人資料"
+    },
+    "timeline": {
+      "title": "時間軸",
+      "memoriesOf": "{{name}}的珍貴回憶 ✨",
+      "noMoments": "還沒有回憶",
+      "noMomentsDescription": "開始用照片和影片記錄那些珍貴的第一時刻吧！",
+      "noBabyProfile": "找不到寶寶資料",
+      "createBabyProfile": "建立資料以開始記錄回憶！",
+      "addMoment": "新增回憶",
+      "seenItAll": "已經看完所有回憶啦！",
+      "loadingMore": "載入更多回憶中...",
+      "age": "{{age}}",
+      "comment": "留言",
+      "comments": "則留言",
+      "noCommentsYet": "還沒有留言，成為第一個分享想法的人吧！💭",
+      "addComment": "留下一則溫馨的留言...",
+      "post": "發布",
+      "sending": "發送中...",
+      "tapToLoad": "點擊載入",
+      "tryAgain": "重試"
+    },
+    "calendar": {
+      "title": "日曆",
+      "today": "今天",
+      "noMomentsOnThisDay": "這一天沒有回憶",
+      "momentsOnThisDay": "這一天有 {{count}} 則回憶",
+      "momentsOnThisDay_plural": "這一天有 {{count}} 則回憶",
+      "noBabyProfile": "找不到寶寶資料",
+      "createBabyProfile": "建立資料以開始記錄回憶！"
+    },
+    "growth": {
+      "title": "成長記錄",
+      "subtitle": "{{name}}的成長軌跡",
+      "weight": "體重",
+      "height": "身高",
+      "headCircumference": "頭圍",
+      "addEntry": "新增記錄",
+      "saveEntry": "儲存記錄",
+      "chart": "{{metric}} 圖表",
+      "chartPlaceholder": "WHO 百分比圖表將在此顯示",
+      "usingRecharts": "使用 Recharts",
+      "allEntries": "所有記錄",
+      "date": "日期",
+      "noBabyProfile": "找不到寶寶資料",
+      "createBabyProfile": "建立資料以開始記錄成長！"
+    },
+    "capsules": {
+      "title": "時光膠囊",
+      "subtitle": "為未來保存珍貴回憶",
+      "newCapsule": "新建膠囊",
+      "createCapsule": "建立時光膠囊",
+      "titlePlaceholder": "例如：一歲生日回憶",
+      "unlockDate": "開啟日期",
+      "content": "內容",
+      "contentPlaceholder": "您想保存些什麼？",
+      "create": "建立膠囊",
+      "lockedCapsules": "已鎖定的膠囊",
+      "timeRemaining": "剩餘時間",
+      "unlocks": "{{date}} 開啟",
+      "readyToOpen": "可以開啟了！",
+      "openCapsule": "開啟膠囊",
+      "noCapsules": "還沒有時光膠囊",
+      "noCapsulesDescription": "建立一個時光膠囊，為未來保存珍貴回憶！",
+      "noBabyProfile": "找不到寶寶資料",
+      "createBabyProfile": "建立資料以開始建立膠囊！"
+    },
+    "profile": {
+      "title": "個人資料",
+      "born": "出生於 {{date}}",
+      "age": "{{age}}大",
+      "milestones": "里程碑",
+      "milestonesNote": "靜態里程碑 - v2 版將可自訂",
+      "firstSmile": "第一次微笑 😊",
+      "rollsOver": "會翻身了 🔄",
+      "sitsWithoutSupport": "能獨自坐穩 🧘",
+      "firstSteps": "第一步 👣",
+      "firstWord": "第一句話 🗣️",
+      "profileNotFound": "找不到寶寶資料。",
+      "noBabyProfile": "找不到寶寶資料",
+      "createBabyProfile": "建立資料以查看里程碑！"
+    },
+    "auth": {
+      "signIn": "登入您的帳號",
+      "emailAddress": "電子郵件",
+      "emailPlaceholder": "your@email.com",
+      "sendSignInLink": "發送登入連結",
+      "sending": "發送中...",
+      "tryDemo": "試用體驗模式（無需後端）",
+      "demoDescription": "體驗模式讓您無需任何設定即可探索介面！",
+      "linkSent": "登入連結已發送！請檢查您的電子郵件並點擊連結登入。",
+      "termsOfService": "登入即表示您同意我們的服務條款和隱私政策。"
+    },
+    "common": {
+      "or": "或",
+      "cancel": "取消",
+      "upload": "上傳",
+      "comingSoon": "完整上傳功能即將推出！",
+      "tapToSelect": "點擊選擇照片或影片",
+      "captureMemory": "捕捉珍貴回憶，永藏美好時刻",
+      "kg": "公斤",
+      "cm": "公分",
+      "save": "儲存",
+      "close": "關閉",
+      "delete": "刪除",
+      "edit": "編輯"
+    },
+    "language": {
+      "switchTo": "English",
+      "switchTo_en": "中文",
+      "current": "中文"
+    }
+  }
+}

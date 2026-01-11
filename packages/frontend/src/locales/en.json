@@ -1,0 +1,128 @@
+{
+  "translation": {
+    "app": {
+      "name": "TimeHut",
+      "tagline": "A private memory book for your baby",
+      "signOut": "Sign Out",
+      "loading": "Loading...",
+      "loadingMemories": "Loading memories..."
+    },
+    "nav": {
+      "timeline": "Timeline",
+      "calendar": "Calendar",
+      "growth": "Growth",
+      "capsules": "Capsules",
+      "profile": "Profile"
+    },
+    "timeline": {
+      "title": "Timeline",
+      "memoriesOf": "{{name}}'s precious memories",
+      "noMoments": "No moments yet",
+      "noMomentsDescription": "Start capturing those precious first moments with photos and videos!",
+      "noBabyProfile": "No baby profile found",
+      "createBabyProfile": "Create a profile to start capturing memories!",
+      "addMoment": "Add Moment",
+      "seenItAll": "You've seen it all!",
+      "loadingMore": "Loading more memories...",
+      "age": "{{age}}",
+      "comment": "Comment",
+      "comments": "comments",
+      "noCommentsYet": "No comments yet. Be the first to share your thoughts!",
+      "addComment": "Add a sweet comment...",
+      "post": "Post",
+      "sending": "Sending...",
+      "tapToLoad": "Tap to load",
+      "tryAgain": "Try again"
+    },
+    "calendar": {
+      "title": "Calendar",
+      "today": "Today",
+      "noMomentsOnThisDay": "No moments on this day",
+      "momentsOnThisDay": "{{count}} moment on this day",
+      "momentsOnThisDay_plural": "{{count}} moments on this day",
+      "noBabyProfile": "No baby profile found",
+      "createBabyProfile": "Create a profile to start capturing memories!"
+    },
+    "growth": {
+      "title": "Growth Tracker",
+      "subtitle": "{{name}}'s growth over time",
+      "weight": "Weight",
+      "height": "Height",
+      "headCircumference": "Head Circumference",
+      "addEntry": "Add Entry",
+      "saveEntry": "Save Entry",
+      "chart": "{{metric}} Chart",
+      "chartPlaceholder": "WHO percentile chart will be rendered here",
+      "usingRecharts": "Using Recharts",
+      "allEntries": "All Entries",
+      "date": "Date",
+      "noBabyProfile": "No baby profile found",
+      "createBabyProfile": "Create a profile to start tracking growth!"
+    },
+    "capsules": {
+      "title": "Time Capsules",
+      "subtitle": "Preserve memories for the future",
+      "newCapsule": "New Capsule",
+      "createCapsule": "Create Time Capsule",
+      "titlePlaceholder": "e.g., First Birthday Memories",
+      "unlockDate": "Unlock Date",
+      "content": "Content",
+      "contentPlaceholder": "What would you like to preserve?",
+      "create": "Create Capsule",
+      "lockedCapsules": "Locked Capsules",
+      "timeRemaining": "Time Remaining",
+      "unlocks": "Unlocks {{date}}",
+      "readyToOpen": "Ready to Open!",
+      "openCapsule": "Open Capsule",
+      "noCapsules": "No time capsules yet",
+      "noCapsulesDescription": "Create a time capsule to preserve memories for the future!",
+      "noBabyProfile": "No baby profile found",
+      "createBabyProfile": "Create a profile to start creating capsules!"
+    },
+    "profile": {
+      "title": "Profile",
+      "born": "Born {{date}}",
+      "age": "{{age}} old",
+      "milestones": "Milestones",
+      "milestonesNote": "Static milestones - will be customizable in v2",
+      "firstSmile": "First smile 😊",
+      "rollsOver": "Rolls over 🔄",
+      "sitsWithoutSupport": "Sits without support 🧘",
+      "firstSteps": "First steps 👣",
+      "firstWord": "First word 🗣️",
+      "profileNotFound": "Baby profile not found.",
+      "noBabyProfile": "No baby profile found",
+      "createBabyProfile": "Create a profile to view milestones!"
+    },
+    "auth": {
+      "signIn": "Sign in to your account",
+      "emailAddress": "Email address",
+      "emailPlaceholder": "you@example.com",
+      "sendSignInLink": "Send Sign-In Link",
+      "sending": "Sending...",
+      "tryDemo": "Try Demo Mode (No Backend)",
+      "demoDescription": "Demo mode lets you explore the UI without any setup!",
+      "linkSent": "Sign-in link sent! Check your email and click the link to sign in.",
+      "termsOfService": "By signing in, you agree to our Terms of Service and Privacy Policy."
+    },
+    "common": {
+      "or": "or",
+      "cancel": "Cancel",
+      "upload": "Upload",
+      "comingSoon": "Full upload functionality coming soon!",
+      "tapToSelect": "Tap to select photo or video",
+      "captureMemory": "Capture a precious memory to cherish forever",
+      "kg": "kg",
+      "cm": "cm",
+      "save": "Save",
+      "close": "Close",
+      "delete": "Delete",
+      "edit": "Edit"
+    },
+    "language": {
+      "switchTo": "中文",
+      "switchTo_en": "English",
+      "current": "English"
+    }
+  }
+}
