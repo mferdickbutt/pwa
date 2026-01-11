@@ -5,10 +5,8 @@
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { useAuthStore } from '../stores/authStore';
 import { signInWithEmail, createUserWithEmail } from '../lib/firebase/auth';
 import { getAuthInstance } from '../lib/firebase/config';
 
@@ -19,8 +17,6 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
-
-  const navigate = useNavigate();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -2,8 +2,7 @@
  * Authentication Store
  *
  * Manages authentication state using Zustand.
- * Integrates with Firebase Auth for email link authentication.
- * Supports demo mode for testing without backend.
+ * Integrates with Firebase Auth for email/password authentication.
  */
 
 import { create } from 'zustand';
@@ -15,7 +14,6 @@ import {
   onAuthStateChange,
   signOut as firebaseSignOut,
   getCurrentUser,
-  completeEmailLinkSignIn,
 } from '../lib/firebase/auth';
 import type { User } from 'firebase/auth';
 import type { FamilyDocument, BabyDocument } from '../types/firestore';
@@ -27,24 +25,6 @@ import {
 } from '../lib/firebase/firestore';
 
 /**
- * Demo mode data
- */
-const DEMO_USER = { uid: 'demo-user', email: 'demo@example.com' } as any;
-const DEMO_FAMILY: FamilyDocument = {
-  id: 'demo-family',
-  name: 'Demo Family',
-  members: { 'demo-user': { role: 'admin' as const, addedAt: new Date().toISOString() } },
-  createdAt: new Date().toISOString(),
-};
-const DEMO_BABY: BabyDocument = {
-  id: 'demo-baby',
-  name: 'Baby Luna',
-  dob: new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000).toISOString(),
-  gender: 'female',
-  createdAt: new Date().toISOString(),
-};
-
-/**
  * Authentication state
  */
 interface AuthState {
@@ -53,7 +33,6 @@ interface AuthState {
   uid: string | null;
   isLoading: boolean;
   isInitialized: boolean;
-  isDemoMode: boolean;
 
   // Family state
   families: FamilyDocument[];
@@ -65,9 +44,7 @@ interface AuthState {
 
   // Actions
   initialize: () => Promise<void>;
-  setEmailLinkSignIn: () => Promise<void>;
   signOut: () => Promise<void>;
-  setDemoMode: () => void;
   setCurrentFamily: (familyId: string) => Promise<void>;
   reloadFamilies: () => Promise<void>;
   reloadBabies: () => Promise<void>;
@@ -84,46 +61,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   uid: null,
   isLoading: true,
   isInitialized: false,
-  isDemoMode: false,
   families: [],
   currentFamily: null,
   currentFamilyId: null,
   babies: [],
 
   /**
-   * Initialize authentication - check for email link sign-in or demo mode
+   * Initialize authentication
    */
   initialize: async () => {
-    // Check for demo mode in sessionStorage
-    const isDemoMode = sessionStorage.getItem('demo-mode') === 'true';
-
-    if (isDemoMode) {
-      // Restore demo mode state
-      set({
-        user: DEMO_USER,
-        uid: DEMO_USER.uid,
-        isLoading: false,
-        isInitialized: true,
-        isDemoMode: true,
-        families: [DEMO_FAMILY],
-        currentFamily: DEMO_FAMILY,
-        currentFamilyId: DEMO_FAMILY.id,
-        babies: [DEMO_BABY],
-      });
-      return;
-    }
-
     const auth = getAuthInstance();
-
-    // Check if this is an email link sign-in completion
-    try {
-      const result = await completeEmailLinkSignIn(auth);
-      if (result) {
-        console.log('[Auth] Email link sign-in completed');
-      }
-    } catch (error) {
-      console.error('[Auth] Email link sign-in check failed:', error);
-    }
 
     // Set up auth state listener
     onAuthStateChange(auth, async (user) => {
@@ -159,22 +106,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   /**
-   * Initiate email link sign-in
-   */
-  setEmailLinkSignIn: async () => {
-    // This is handled by the sendEmailLink function in auth.ts
-    // This function is a placeholder for any UI-side actions needed
-    console.log('[Auth] Email link sign-in initiated');
-  },
-
-  /**
    * Sign out
    */
   signOut: async () => {
-    // Clear demo mode
-    sessionStorage.removeItem('demo-mode');
-    set({ isDemoMode: false });
-
     const auth = getAuthInstance();
     await firebaseSignOut(auth);
     localStorage.removeItem('timehut_current_family_id');
@@ -189,38 +123,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   /**
-   * Enable demo mode
-   */
-  setDemoMode: () => {
-    sessionStorage.setItem('demo-mode', 'true');
-    set({
-      user: DEMO_USER,
-      uid: DEMO_USER.uid,
-      isLoading: false,
-      isInitialized: true,
-      isDemoMode: true,
-      families: [DEMO_FAMILY],
-      currentFamily: DEMO_FAMILY,
-      currentFamilyId: DEMO_FAMILY.id,
-      babies: [DEMO_BABY],
-    });
-  },
-
-  /**
    * Set current family
    */
   setCurrentFamily: async (familyId: string) => {
-    // Demo mode shortcut
-    if (get().isDemoMode && familyId === 'demo-family') {
-      set({
-        currentFamily: DEMO_FAMILY,
-        currentFamilyId: DEMO_FAMILY.id,
-        babies: [DEMO_BABY],
-      });
-      localStorage.setItem('timehut_current_family_id', familyId);
-      return;
-    }
-
     const auth = getAuthInstance();
     const user = getCurrentUser(auth);
 
@@ -260,8 +165,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    * Reload all families for current user
    */
   reloadFamilies: async () => {
-    const { uid, isDemoMode } = get();
-    if (isDemoMode) return; // Skip in demo mode
+    const { uid } = get();
     if (!uid) return;
 
     const db = await getFirestoreInstance();
@@ -274,8 +178,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    * Reload babies for current family
    */
   reloadBabies: async () => {
-    const { currentFamilyId, isDemoMode } = get();
-    if (isDemoMode) return; // Skip in demo mode
+    const { currentFamilyId } = get();
     if (!currentFamilyId) return;
 
     const db = await getFirestoreInstance();
@@ -288,17 +191,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    * Update baby profile
    */
   updateBaby: async (babyId, updates) => {
-    const { currentFamilyId, isDemoMode } = get();
-
-    // Update local state immediately for demo mode
-    if (isDemoMode) {
-      set({
-        babies: get().babies.map((b) =>
-          b.id === babyId ? { ...b, ...updates } : b
-        ),
-      });
-      return;
-    }
+    const { currentFamilyId } = get();
 
     if (!currentFamilyId) {
       throw new Error('No family selected');
@@ -320,13 +213,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    * Reset store (for testing)
    */
   reset: () => {
-    sessionStorage.removeItem('demo-mode');
     set({
       user: null,
       uid: null,
       isLoading: true,
       isInitialized: false,
-      isDemoMode: false,
       families: [],
       currentFamily: null,
       currentFamilyId: null,
