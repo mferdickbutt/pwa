@@ -1,19 +1,12 @@
 name = "timehut-media-api"
 main = "src/index.ts"
-compatibility_date = "2024-01-01"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
 
-# Local development with MinIO
-[env.development]
-vars = { ENVIRONMENT = "development" }
-
-# Production with Cloudflare R2
-[env.production]
-vars = { ENVIRONMENT = "production" }
-
-# R2 binding for production
-[[env.production.r2_buckets]]
+# R2 binding
+[[r2_buckets]]
 binding = "R2"
-bucket_name = "timehut-media"
+bucket_name = "baby47moments"
 
 # Environment variables (set via `wrangler secret put` or in .env)
 # - FIREBASE_SERVICE_ACCOUNT_KEY

@@ -18,7 +18,8 @@
     "type-check": "npm run type-check --workspace=packages/frontend"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "wrangler": "^4.58.0"
   },
   "engines": {
     "node": ">=18.0.0",

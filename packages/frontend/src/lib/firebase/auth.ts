@@ -1,80 +1,32 @@
 /**
  * Firebase Authentication Helper Functions
  *
- * Note: Using email link (passwordless) authentication as per user preference.
+ * Supports email/password authentication.
  */
 
 import {
   Auth,
   User,
   UserCredential,
-  signInAnonymously,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
-  sendSignInLinkToEmail,
-  isSignInWithEmailLink,
-  signInWithEmailLink,
   onAuthStateChanged,
   Unsubscribe,
 } from 'firebase/auth';
 
-// Action code settings for email link authentication
-const ACTION_CODE_SETTINGS = {
-  // URL must be whitelisted in Firebase Console
-  url: import.meta.env.VITE_APP_URL || window.location.origin,
-  handleCodeInApp: true,
-  // When multiple accounts share email, iOS will prompt to choose
-  iOS: {
-    bundleId: 'com.timehut.app',
-  },
-  android: {
-    packageName: 'com.timehut.app',
-    installApp: true,
-  },
-};
-
 /**
- * Send sign-in link to email
+ * Sign in with email and password
  */
-export async function sendEmailLink(auth: Auth, email: string): Promise<void> {
-  await sendSignInLinkToEmail(auth, email, ACTION_CODE_SETTINGS);
-
-  // Save email to localStorage for verification completion
-  window.localStorage.setItem('timehut_email_for_signin', email);
+export async function signInWithEmail(auth: Auth, email: string, password: string): Promise<UserCredential> {
+  return signInWithEmailAndPassword(auth, email, password);
 }
 
 /**
- * Complete sign-in with email link
- * Call this when the app opens with an email link (check URL for ?apiKey=...)
+ * Create a new user with email and password
  */
-export async function completeEmailLinkSignIn(auth: Auth): Promise<UserCredential | null> {
-  if (isSignInWithEmailLink(auth, window.location.href)) {
-    let email = window.localStorage.getItem('timehut_email_for_signin');
-
-    if (!email) {
-      // If email not stored, prompt user
-      email = window.prompt('Please provide your email for confirmation') || '';
-    }
-
-    if (!email) {
-      throw new Error('Email is required to complete sign-in');
-    }
-
-    const result = await signInWithEmailLink(auth, email, window.location.href);
-
-    // Clear email from storage
-    window.localStorage.removeItem('timehut_email_for_signin');
-
-    return result;
-  }
-
-  return null;
-}
-
-/**
- * Sign in anonymously (for testing with emulator)
- */
-export async function signInAnonymouslyForTesting(auth: Auth): Promise<UserCredential> {
-  return signInAnonymously(auth);
+export async function createUserWithEmail(auth: Auth, email: string, password: string): Promise<UserCredential> {
+  return createUserWithEmailAndPassword(auth, email, password);
 }
 
 /**

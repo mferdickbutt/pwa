@@ -1,8 +1,7 @@
 /**
  * Authentication Page - Warm Memory Book Design
  *
- * Handles email link authentication (passwordless).
- * Demo mode available when emulators aren't running.
+ * Handles email/password authentication.
  */
 
 import { useState } from 'react';
@@ -10,68 +9,53 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
-import { sendEmailLink } from '../lib/firebase/auth';
+import { signInWithEmail, createUserWithEmail } from '../lib/firebase/auth';
 import { getAuthInstance } from '../lib/firebase/config';
-
-// Demo moments for demo mode
-const DEMO_MOMENTS = [
-  { id: '1', dateTaken: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), dateKey: '2025-01-10', caption: 'First smile!', mediaType: 'photo' as const, contentType: 'image/jpeg', mediaObjectKey: 'demo1', createdAt: new Date().toISOString(), createdByUid: 'demo-user' },
-  { id: '2', dateTaken: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), dateKey: '2025-01-04', caption: 'Tummy time!', mediaType: 'photo' as const, contentType: 'image/jpeg', mediaObjectKey: 'demo2', createdAt: new Date().toISOString(), createdByUid: 'demo-user' },
-  { id: '3', dateTaken: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), dateKey: '2024-12-12', caption: 'Meeting Santa', mediaType: 'photo' as const, contentType: 'image/jpeg', mediaObjectKey: 'demo3', createdAt: new Date().toISOString(), createdByUid: 'demo-user' },
-];
 
 export default function AuthPage() {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    setMessage('');
 
     try {
       const auth = getAuthInstance();
-      await sendEmailLink(auth, email);
 
-      setMessage(t('auth.linkSent'));
-      setEmail('');
+      if (isSignUp) {
+        await createUserWithEmail(auth, email, password);
+      } else {
+        await signInWithEmail(auth, email, password);
+      }
+
+      // Navigation will happen automatically via auth state change
     } catch (err: any) {
-      setError(err.message || 'Failed to send sign-in link');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      let errorMessage = err.message || 'Authentication failed';
 
-  // Demo mode - works without any backend
-  const handleDemoMode = async () => {
-    setIsLoading(true);
-    setError('');
+      // Firebase error handling
+      if (err.code === 'auth/user-not-found') {
+        errorMessage = 'No account found with this email';
+      } else if (err.code === 'auth/wrong-password') {
+        errorMessage = 'Incorrect password';
+      } else if (err.code === 'auth/email-already-in-use') {
+        errorMessage = 'An account with this email already exists';
+      } else if (err.code === 'auth/weak-password') {
+        errorMessage = 'Password should be at least 6 characters';
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address';
+      } else if (err.code === 'auth/invalid-credential') {
+        errorMessage = 'Invalid email or password';
+      }
 
-    try {
-      // Set demo mode in auth store
-      const { setDemoMode } = useAuthStore.getState();
-      setDemoMode();
-
-      // Set demo moments
-      const momentStore = await import('../stores/momentStore');
-      momentStore.useMomentStore.setState({
-        moments: DEMO_MOMENTS.map((m) => ({
-          ...m,
-          displayUrl: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#fef9c3"/><stop offset="100%" style="stop-color:#fed7aa"/></linearGradient></defs><rect fill="url(#bg)" width="400" height="400"/><circle cx="200" cy="150" r="60" fill="#fca5a5"/><circle cx="180" cy="140" r="8" fill="#1f2937"/><circle cx="220" cy="140" r="8" fill="#1f2937"/><path d="M170 180 Q200 210 230 180" stroke="#1f2937" stroke-width="4" fill="none"/><text x="200" y="320" text-anchor="middle" font-size="24" fill="#78350f">First smile!</text></svg>'),
-          isUrlLoading: false,
-        })),
-        hasMore: false,
-      });
-
-      navigate('/timeline');
-    } catch (err: any) {
-      setError(err.message || 'Failed to start demo');
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -139,14 +123,16 @@ export default function AuthPage() {
           <p className="text-warm-500 font-medium">{t('app.tagline')}</p>
         </motion.div>
 
-        {/* Sign-in form */}
+        {/* Sign-in/Sign-up form */}
         <motion.div
           className="glass-dark rounded-3xl shadow-glass-lg p-8 border border-white/50"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h2 className="font-display font-bold text-2xl text-warm-800 mb-6">{t('auth.signIn')}</h2>
+          <h2 className="font-display font-bold text-2xl text-warm-800 mb-6">
+            {isSignUp ? 'Create Account' : 'Sign In'}
+          </h2>
 
           {/* Error message */}
           <AnimatePresence>
@@ -162,24 +148,10 @@ export default function AuthPage() {
             )}
           </AnimatePresence>
 
-          {/* Success message */}
-          <AnimatePresence>
-            {message && (
-              <motion.div
-                className="mb-4 p-4 bg-green-50 border-l-4 border-green-400 rounded-r-xl"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-              >
-                <p className="text-green-700 font-medium">{message}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <form onSubmit={handleSignIn} className="space-y-5">
+          <form onSubmit={handleAuth} className="space-y-5">
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-warm-700 mb-2">
-                {t('auth.emailAddress')}
+                Email Address
               </label>
               <input
                 id="email"
@@ -187,7 +159,24 @@ export default function AuthPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder={t('auth.emailPlaceholder')}
+                placeholder="your@email.com"
+                className="w-full px-4 py-3 bg-white/80 border-2 border-warm-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-primary-400 focus:outline-none transition-all font-medium text-warm-700 placeholder:text-warm-400"
+                disabled={isLoading}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-semibold text-warm-700 mb-2">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                placeholder="••••••••"
                 className="w-full px-4 py-3 bg-white/80 border-2 border-warm-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-primary-400 focus:outline-none transition-all font-medium text-warm-700 placeholder:text-warm-400"
                 disabled={isLoading}
               />
@@ -195,7 +184,7 @@ export default function AuthPage() {
 
             <motion.button
               type="submit"
-              disabled={isLoading || !email}
+              disabled={isLoading || !email || !password}
               className="w-full bg-gradient-to-r from-primary-400 via-sunset-400 to-rose-400 text-white py-3.5 rounded-xl font-bold shadow-warm hover:shadow-warm-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all press-feedback"
               whileHover={{ scale: 1.01, y: -1 }}
               whileTap={{ scale: 0.98 }}
@@ -207,62 +196,34 @@ export default function AuthPage() {
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                   />
-                  {t('auth.sending')}
+                  {isSignUp ? 'Creating Account...' : 'Signing In...'}
                 </span>
               ) : (
-                t('auth.sendSignInLink')
+                isSignUp ? 'Create Account' : 'Sign In'
               )}
             </motion.button>
           </form>
 
-          <div className="mt-8">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-warm-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white/80 text-warm-400 font-medium">{t('common.or')}</span>
-              </div>
-            </div>
-
-            <motion.button
-              onClick={handleDemoMode}
+          {/* Toggle between sign in and sign up */}
+          <div className="mt-6 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError('');
+              }}
               disabled={isLoading}
-              className="mt-5 w-full bg-gradient-to-r from-emerald-400 to-teal-500 text-white py-3.5 rounded-xl font-bold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all press-feedback"
-              whileHover={{ scale: 1.01, y: -1 }}
-              whileTap={{ scale: 0.98 }}
+              className="text-primary-600 hover:text-primary-700 font-medium text-sm"
             >
-              {isLoading ? (
-                <span className="flex items-center justify-center">
-                  <motion.span
-                    className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full mr-2"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  />
-                  {t('app.loading')}
-                </span>
-              ) : (
-                <span className="flex items-center justify-center">
-                  <motion.span
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 0.5 }}
-                    className="mr-2"
-                  >
-                    🎮
-                  </motion.span>
-                  {t('auth.tryDemo')}
-                </span>
-              )}
-            </motion.button>
+              {isSignUp
+                ? 'Already have an account? Sign In'
+                : "Don't have an account? Sign Up"}
+            </button>
           </div>
-
-          <p className="mt-6 text-sm text-warm-400 text-center">
-            {t('auth.demoDescription')}
-          </p>
         </motion.div>
 
         <p className="mt-6 text-center text-sm text-warm-400">
-          {t('auth.termsOfService')}
+          By signing in, you agree to our Terms of Service and Privacy Policy.
         </p>
       </motion.div>
     </div>
