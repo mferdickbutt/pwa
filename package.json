@@ -7,7 +7,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:api\"",
+    "firebase:emulators": "cd firebase && firebase emulators:start --only auth,firestore --project timehut-local",
+    "dev": "npx concurrently \"npm run firebase:emulators\" \"npm run dev:frontend\" \"npm run dev:api\"",
     "dev:frontend": "npm run dev --workspace=packages/frontend",
     "dev:api": "npm run dev --workspace=packages/media-api",
     "build": "npm run build --workspace=packages/frontend && npm run build --workspace=packages/media-api",
