@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ULTRA-SIMPLE rules for debugging - just check authentication
+
+    // Helper function
+    function isAuthenticated() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    // Families collection
+    match /families/{familyId} {
+      // Create: Any authenticated user
+      allow create: if isAuthenticated();
+      
+      // Read: Any authenticated user
+      allow read: if isAuthenticated();
+      
+      // Write: Any authenticated user
+      allow write: if isAuthenticated();
+      
+      // Members subcollection
+      match /members/{uid} {
+        allow read, write: if isAuthenticated();
+      }
+      
+      // Babies subcollection
+      match /babies/{babyId} {
+        allow read, write: if isAuthenticated();
+        
+        // All nested collections
+        match /{document=**} {
+          allow read, write: if isAuthenticated();
+        }
+      }
+    }
+
+    // Root wildcard for everything else
+    match /{document=**} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}
