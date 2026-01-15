@@ -10,7 +10,6 @@ import {
   getAuth,
   connectAuthEmulator,
   Auth,
-  inMemoryPersistence,
   setPersistence,
   browserLocalPersistence,
 } from 'firebase/auth';
