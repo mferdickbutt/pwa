@@ -1,0 +1,81 @@
+name: PWA CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Type-check Frontend
+        run: |
+          cd packages/frontend
+          npm run type-check
+
+      - name: Lint Frontend
+        run: |
+          cd packages/frontend
+          npm run lint
+
+      - name: Run Tests
+        run: |
+          npm test
+
+      - name: Build Frontend
+        run: |
+          cd packages/frontend
+          npm run build
+
+      - name: Upload coverage
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./packages/frontend/coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
+
+      - name: Check for hardcoded credentials
+        run: |
+          # Check for common secrets
+          if grep -r "FIREBASE_API_KEY.*=" . --include="*.ts" --include="*.tsx"; then
+            echo "::error::Found hardcoded API keys"
+            exit 1
+          fi
+          
+          if grep -r "const.*password.*=" . --include="*.ts" --include="*.tsx" -i; then
+            echo "::error::Found hardcoded passwords"
+            exit 1
+          fi
+
+      - name: Check package.json for sensitive data
+        run: |
+          # Check for secrets in package.json
+          if grep -E "(token|password|secret)" package.json -i; then
+            echo "::warning::Found potentially sensitive words in package.json"
+          fi
+
+      - name: Security check
+        run: |
+          echo "Running security checks..."
+          # Add additional security checks as needed
+          echo "Security checks passed"

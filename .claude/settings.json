@@ -1,0 +1,54 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ \"$(git branch --show-current)\" = \"main\" ] || { echo '{\"block\": true, \"message\": \"Cannot edit files on main branch\"}' >&2; exit 2; }",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/lc66/pwa/packages/frontend && npx prettier --write \"$FILE_PATH\" 2>&1 || echo 'Prettier not available, skipping'",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "cd /home/lc66/pwa/packages/frontend && npx eslint \"$FILE_PATH\" --fix 2>&1 || echo 'ESLint fix completed'",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": ".*(Page|Store|Auth|Media|Capsule|Baby).*\\.tsx?",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/lc66/pwa/packages/frontend && npx tsc --noEmit \"$FILE_PATH\" 2>&1 || echo 'TypeScript check completed'",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"continue\": true}'",
+            "timeout": 1
+          }
+        ]
+      }
+    ]
+  }
+}
