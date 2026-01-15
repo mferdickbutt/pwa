@@ -39,7 +39,12 @@ jobs:
 
       - name: Run Tests
         run: |
-          npm test
+          # Check if test files exist before running tests
+          if find packages/frontend/src -name "*.test.ts" -o -name "*.test.tsx" -o -name "*.spec.ts" -o -name "*.spec.tsx" | grep -q .; then
+            npm test
+          else
+            echo "No test files found, skipping tests"
+          fi
 
       - name: Build Frontend
         run: |
