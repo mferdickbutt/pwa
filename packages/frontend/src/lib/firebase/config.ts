@@ -61,8 +61,10 @@ export function getAuthInstance(): Auth {
 
     // Configure persistence
     if (USE_EMULATORS) {
-      // Use in-memory persistence for emulator testing
-      setPersistence(authInstance, inMemoryPersistence);
+      // Use local persistence even with emulators to prevent logout on refresh
+      setPersistence(authInstance, browserLocalPersistence).catch((error) => {
+        console.error('Failed to set auth persistence:', error);
+      });
     } else {
       // Use local persistence for production
       setPersistence(authInstance, browserLocalPersistence).catch((error) => {
