@@ -76,40 +76,48 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    * Initialize authentication
    */
   initialize: async () => {
-    const auth = getAuthInstance();
+    try {
+      const auth = await getAuthInstance();
 
-    onAuthStateChange(auth, async (user) => {
+      onAuthStateChange(auth, async (user) => {
+        set({
+          user,
+          uid: user?.uid || null,
+          isLoading: false,
+          isInitialized: true,
+        });
+
+        if (user) {
+          await get().reloadFamilies();
+
+          const savedFamilyId = localStorage.getItem(CURRENT_FAMILY_ID_KEY);
+          const familyId = savedFamilyId || get().families[0]?.id;
+          if (familyId) {
+            await get().setCurrentFamily(familyId);
+          }
+        } else {
+          set({
+            families: [],
+            currentFamily: null,
+            currentFamilyId: null,
+            babies: [],
+          });
+        }
+      });
+    } catch (error) {
+      console.error('[Auth] Failed to initialize:', error);
       set({
-        user,
-        uid: user?.uid || null,
         isLoading: false,
         isInitialized: true,
       });
-
-      if (user) {
-        await get().reloadFamilies();
-
-        const savedFamilyId = localStorage.getItem(CURRENT_FAMILY_ID_KEY);
-        const familyId = savedFamilyId || get().families[0]?.id;
-        if (familyId) {
-          await get().setCurrentFamily(familyId);
-        }
-      } else {
-        set({
-          families: [],
-          currentFamily: null,
-          currentFamilyId: null,
-          babies: [],
-        });
-      }
-    });
+    }
   },
 
   /**
    * Sign out
    */
   signOut: async () => {
-    const auth = getAuthInstance();
+    const auth = await getAuthInstance();
     await firebaseSignOut(auth);
     localStorage.removeItem(CURRENT_FAMILY_ID_KEY);
     set({
@@ -144,7 +152,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    * Set current family
    */
   setCurrentFamily: async (familyId: string) => {
-    const auth = getAuthInstance();
+    const auth = await getAuthInstance();
     const user = getCurrentUser(auth);
 
     if (!user) {

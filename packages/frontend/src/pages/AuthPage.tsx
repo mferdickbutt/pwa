@@ -24,7 +24,7 @@ export default function AuthPage() {
     setError('');
 
     try {
-      const auth = getAuthInstance();
+      const auth = await getAuthInstance();
 
       if (isSignUp) {
         await createUserWithEmail(auth, email, password);

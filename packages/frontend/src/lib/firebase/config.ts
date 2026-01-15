@@ -52,23 +52,19 @@ export function getFirebaseApp(): FirebaseApp {
 /**
  * Get or create Auth instance
  */
-export function getAuthInstance(): Auth {
+export async function getAuthInstance(): Promise<Auth> {
   const firebaseApp = getFirebaseApp();
 
   if (!authInstance) {
     authInstance = getAuth(firebaseApp);
 
-    // Configure persistence
-    if (USE_EMULATORS) {
-      // Use local persistence even with emulators to prevent logout on refresh
-      setPersistence(authInstance, browserLocalPersistence).catch((error) => {
-        console.error('Failed to set auth persistence:', error);
-      });
-    } else {
-      // Use local persistence for production
-      setPersistence(authInstance, browserLocalPersistence).catch((error) => {
-        console.error('Failed to set auth persistence:', error);
-      });
+    // Configure persistence - MUST be set before any other auth operations
+    try {
+      await setPersistence(authInstance, browserLocalPersistence);
+      console.log('[Firebase] Auth persistence set to browserLocalPersistence');
+    } catch (error) {
+      console.error('[Firebase] Failed to set auth persistence:', error);
+      throw error;
     }
 
     // Connect to emulator if enabled

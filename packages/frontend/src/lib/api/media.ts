@@ -61,7 +61,7 @@ export type UploadProgressCallback = (progress: number) => void;
  * Get auth headers for API requests
  */
 async function getAuthHeaders(): Promise<HeadersInit> {
-  const auth = getAuthInstance();
+  const auth = await getAuthInstance();
   const idToken = await getIdToken(auth);
 
   if (!idToken) {
