@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Ultra-permissive development rule - removes all restrictions
+    // Use this ONLY for debugging onboarding issues
+    
+    // Families collection
+    match /families/{familyId} {
+      // Create: ANYONE (even unauthenticated users) can create families
+      allow create: if true;
+
+      // Read: ANYONE can read
+      allow read: if true;
+
+      // Update: ANYONE can update
+      allow update: if true;
+
+      // Delete: ANYONE can delete
+      allow delete: if true;
+
+      // Members subcollection
+      match /members/{uid} {
+        allow read, write: if true;
+      }
+
+      // Babies subcollection
+      match /babies/{babyId} {
+        allow read, write: if true;
+
+        // All subcollections
+        match /{document=**} {
+          allow read, write: if true;
+        }
+      }
+    }
+
+    // Root-level wildcard for debugging
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
