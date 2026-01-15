@@ -35,6 +35,54 @@ const config = {
 // Use emulators flag
 const USE_EMULATORS = import.meta.env.VITE_USE_EMULATORS === 'true';
 
+/**
+ * Check if localStorage is available and working
+ */
+function checkLocalStorageAvailability(): boolean {
+  try {
+    const testKey = '__firebase_auth_test__';
+    localStorage.setItem(testKey, 'test');
+    localStorage.removeItem(testKey);
+    console.log('[Firebase] localStorage is available and working');
+
+    // Log what's currently in localStorage
+    logLocalStorageContents();
+
+    return true;
+  } catch (error) {
+    console.error('[Firebase] ❌ localStorage is NOT available:', error);
+    console.warn('[Firebase] This will cause auth to fail on refresh!');
+    return false;
+  }
+}
+
+/**
+ * Log localStorage contents for debugging
+ */
+function logLocalStorageContents(): void {
+  console.log('[Firebase] Current localStorage contents:');
+  const allKeys = Object.keys(localStorage);
+  const firebaseKeys = allKeys.filter(k =>
+    k.toLowerCase().includes('firebase') ||
+    k.toLowerCase().includes('auth')
+  );
+
+  if (firebaseKeys.length > 0) {
+    console.log('[Firebase]   Found', firebaseKeys.length, 'Firebase-related keys:');
+    firebaseKeys.forEach(key => {
+      const value = localStorage.getItem(key);
+      const preview = value ? value.substring(0, 50) + '...' : '(empty)';
+      console.log('[Firebase]     -', key, ':', preview);
+    });
+  } else {
+    console.log('[Firebase]   No Firebase keys found (this is expected on fresh load)');
+  }
+
+  // Check for our custom keys
+  const currentFamilyId = localStorage.getItem('timehut_current_family_id');
+  console.log('[Firebase]   Current family ID:', currentFamilyId || 'None');
+}
+
 let app: FirebaseApp | null = null;
 let authInstance: Auth | null = null;
 let firestoreInstance: Firestore | null = null;
@@ -56,15 +104,32 @@ export async function getAuthInstance(): Promise<Auth> {
   const firebaseApp = getFirebaseApp();
 
   if (!authInstance) {
+    console.log('[Firebase] Creating new auth instance...');
+
+    // Check localStorage availability first
+    const localStorageAvailable = checkLocalStorageAvailability();
+
     authInstance = getAuth(firebaseApp);
 
     // Configure persistence - MUST be set before any other auth operations
-    try {
-      await setPersistence(authInstance, browserLocalPersistence);
-      console.log('[Firebase] Auth persistence set to browserLocalPersistence');
-    } catch (error) {
-      console.error('[Firebase] Failed to set auth persistence:', error);
-      throw error;
+    if (localStorageAvailable) {
+      try {
+        console.log('[Firebase] Setting auth persistence to browserLocalPersistence...');
+        await setPersistence(authInstance, browserLocalPersistence);
+        console.log('[Firebase] ✅ Auth persistence successfully set to browserLocalPersistence');
+      } catch (error: any) {
+        console.error('[Firebase] ❌ Failed to set auth persistence:', error);
+        console.error('[Firebase] Error details:', {
+          code: error?.code,
+          message: error?.message,
+          name: error?.name
+        });
+        // Don't throw - allow app to continue without persistence
+        // This is better than crashing the app
+        console.warn('[Firebase] ⚠️  Continuing without persistence - user will be logged out on refresh');
+      }
+    } else {
+      console.warn('[Firebase] ⚠️  localStorage not available - auth cannot persist');
     }
 
     // Connect to emulator if enabled
@@ -75,6 +140,18 @@ export async function getAuthInstance(): Promise<Auth> {
       connectAuthEmulator(authInstance, authEmulatorUrl);
       console.log(`[Firebase] Connected to Auth emulator at ${authEmulatorUrl}`);
     }
+
+    // Verify persistence setting
+    try {
+      const persistenceType = authInstance.persistence;
+      console.log('[Firebase] Current persistence type:', persistenceType);
+    } catch (err) {
+      console.warn('[Firebase] Could not verify persistence type:', err);
+    }
+  } else {
+    console.log('[Firebase] Reusing existing auth instance');
+    // Log localStorage contents to see what we have on refresh
+    logLocalStorageContents();
   }
 
   return authInstance;

@@ -76,10 +76,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    * Initialize authentication
    */
   initialize: async () => {
+    console.log('[AuthStore] Initializing auth store...');
     try {
       const auth = await getAuthInstance();
+      console.log('[AuthStore] Got auth instance, setting up state listener...');
 
       onAuthStateChange(auth, async (user) => {
+        console.log('[AuthStore] Auth state changed:');
+        console.log('[AuthStore]   User:', user ? `✅ ${user.email} (${user.uid})` : '❌ Null');
+
+        if (user) {
+          console.log('[AuthStore]   User metadata:');
+          console.log('[AuthStore]     Created:', new Date(user.metadata.creationTime).toISOString());
+          console.log('[AuthStore]     Last sign-in:', new Date(user.metadata.lastSignInTime).toISOString());
+          console.log('[AuthStore]     Email verified:', user.emailVerified);
+          console.log('[AuthStore]     Provider:', user.providerData[0]?.providerId);
+        }
+
         set({
           user,
           uid: user?.uid || null,
@@ -88,14 +101,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
 
         if (user) {
+          console.log('[AuthStore] User authenticated, loading families...');
           await get().reloadFamilies();
 
           const savedFamilyId = localStorage.getItem(CURRENT_FAMILY_ID_KEY);
           const familyId = savedFamilyId || get().families[0]?.id;
+          console.log('[AuthStore] Selected family:', familyId);
           if (familyId) {
             await get().setCurrentFamily(familyId);
           }
         } else {
+          console.log('[AuthStore] User not authenticated, clearing data...');
           set({
             families: [],
             currentFamily: null,
@@ -104,8 +120,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           });
         }
       });
+
+      console.log('[AuthStore] Auth state listener set up');
     } catch (error) {
-      console.error('[Auth] Failed to initialize:', error);
+      console.error('[AuthStore] Failed to initialize:', error);
       set({
         isLoading: false,
         isInitialized: true,
